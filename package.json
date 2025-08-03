@@ -4,8 +4,8 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"lint": "eslint --ext .ts,.jsx,.tsx --fix --quiet ./packages",
+		"test": "jest --config scripts/jest/jest.config.js",
+		"lint": "eslint --ext .js,.ts,.jsx,.tsx --fix --quiet ./packages",
 		"prepare": "husky"
 	},
 	"keywords": [],
@@ -23,6 +23,7 @@
 		"eslint-plugin-react": "^7.37.5",
 		"globals": "^16.3.0",
 		"husky": "^9.1.7",
+		"jest": "^30.0.5",
 		"jiti": "^2.5.1",
 		"prettier": "^3.6.2",
 		"typescript-eslint": "^8.38.0"
