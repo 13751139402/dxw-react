@@ -4,7 +4,7 @@ import {
 	Key,
 	Ref,
 	Props,
-	ReactElement,
+	ReactElementType,
 	ElementType
 } from 'shared/ReactTypes';
 
@@ -12,7 +12,7 @@ import {
 
 // 与环境无关的共享函数
 const ReactElement = function (type: Type, key: Key, ref: Ref, props: Props) {
-	const element: ReactElement = {
+	const element: ReactElementType = {
 		$$typeof: REACT_ELEMENT_TYPE,
 		key,
 		ref,
