@@ -17,19 +17,19 @@ export const createUpdate = <State>(action: Action<State>): Update<State> => {
 };
 
 // 保存update的数据结构updateQueue
-export const createUpdateQueue = <Action>() => {
+export const createUpdateQueue = <State>() => {
 	return {
 		// shared之所以是对象是因为能在currentFiber和workInProgress中共用同一个对象
 		shared: {
 			pending: null
 		}
-	} as UpdateQueue<Action>;
+	} as UpdateQueue<State>;
 };
 
 // 将update插入到updateQueue中
-export const enqueueUpdate = <Action>(
-	updateQueue: UpdateQueue<Action>,
-	update: Update<Action>
+export const enqueueUpdate = <State>(
+	updateQueue: UpdateQueue<State>,
+	update: Update<State>
 ) => {
 	updateQueue.shared.pending = update;
 };

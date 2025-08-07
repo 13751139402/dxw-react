@@ -11,6 +11,7 @@ import { ReactElementType } from 'shared/ReactTypes';
 import { scheduleUpdateOnFiber } from './workLoop';
 
 // 创建整个应用的根节点FiberRootNode,并将FiberRootNode和hostRootFiber连接起来
+// reactDom.createRoot(root).render(<App/>)的createRoot函数
 export function createContainer(container: Container) {
 	const hostRootFiber = new FiberNode(HostRoot, {}, null);
 	const root = new FiberRootNode(container, hostRootFiber);
@@ -20,6 +21,7 @@ export function createContainer(container: Container) {
 
 // 创建update,并将update enqueue updateQueue中,将[首屏渲染]与[触发机制]连接起来
 // 触发更新的机制是保存在updateQueue中的
+// reactDom.createRoot(root).render(<App/>)的render函数
 export function updateContainer(
 	element: ReactElementType | null,
 	root: FiberRootNode

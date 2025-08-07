@@ -6,6 +6,8 @@ import { HostRoot } from './warkTags';
 // 深度优先遍历
 let workInProgress: FiberNode | null;
 
+// 词意：准备新鲜的堆栈
+// 创建wip hostRootFiber
 function prepareFreshStack(root: FiberRootNode) {
 	// 根据(root.current，即hostRootFiber生成对应的workInProgress
 	workInProgress = createWorkInProgress(root.current, {});
@@ -32,6 +34,7 @@ function markUpdateFormFiberToRoot(fiber: FiberNode) {
 	return null;
 }
 
+// 从根节点开始diff
 function renderRoot(root: FiberRootNode) {
 	// 初始化生成wip树的hostRootFiber
 	prepareFreshStack(root);
@@ -43,7 +46,9 @@ function renderRoot(root: FiberRootNode) {
 		try {
 			workLoop();
 		} catch (e) {
-			console.warn('workLoop发生错误', e);
+			if (__DEV__) {
+				console.warn('workLoop发生错误', e);
+			}
 			workInProgress = null;
 		}
 	} while (true);
@@ -54,13 +59,16 @@ function workLoop() {
 		performUnitOfWork(workInProgress);
 	}
 }
-
+// 词意：执行工作单元
 function performUnitOfWork(fiber: FiberNode) {
 	const next = beginWork(fiber);
+	// 等待的props变为当前props
 	fiber.memoizedProps = fiber.pendingProps;
 	if (next === null) {
+		// 到底开始“归”阶段
 		completeUnitOfWork(fiber);
 	} else {
+		// 没到底就继续“递”
 		workInProgress = next;
 	}
 }
@@ -72,10 +80,12 @@ function completeUnitOfWork(fiber: FiberNode) {
 		const next = completeWork(node);
 		const sibling = node.sibling;
 		if (sibling !== null) {
+			// 有sibling就结束当前completeUnitOfWork，开始执行sibling的"递"
 			workInProgress = sibling;
 			return;
 		}
+		// "归"完成就回到父级
 		node = node.return;
 		workInProgress = null;
-	} while (node !== null);
+	} while (node !== null); // 一直"归"到HostRootFiber
 }

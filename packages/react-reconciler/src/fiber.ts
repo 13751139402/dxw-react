@@ -1,5 +1,5 @@
-import { Props, Key, Ref } from 'shared/ReactTypes';
-import { WorkTag } from './warkTags';
+import { Props, Key, Ref, ReactElementType } from 'shared/ReactTypes';
+import { FunctionComponent, HostComponent, WorkTag } from './warkTags';
 import { Flags, NoFlags } from './fiberFlags';
 import { Container } from 'hostConfig';
 export class FiberNode {
@@ -56,6 +56,7 @@ export class FiberRootNode {
 	finishWork: FiberNode | null;
 	constructor(container: Container, hostRootFiber: FiberNode) {
 		this.container = container;
+		// FiberRootNode在创建之初.current就指向了hostRootFiber
 		this.current = hostRootFiber;
 		hostRootFiber.stateNode = this;
 		this.finishWork = null;
@@ -87,4 +88,20 @@ export const createWorkInProgress = (
 	wip.child = current.child;
 	wip.memoizedProps = current.memoizedProps;
 	wip.memoizedState = current.memoizedState;
+
+	return wip;
 };
+
+export function createFiberFormElement(element: ReactElementType) {
+	const { type, key, props } = element;
+	let fiberTag: WorkTag = FunctionComponent;
+	if (typeof type === 'string') {
+		// <div/> type: 'div'
+		fiberTag = HostComponent;
+	} else if (typeof type !== 'function' && __DEV__) {
+		console.warn('未定义的type类型', element);
+	}
+	const fiber = new FiberNode(fiberTag, props, key);
+	fiber.type = type;
+	return fiber;
+}
