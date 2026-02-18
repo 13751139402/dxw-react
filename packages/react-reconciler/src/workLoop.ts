@@ -9,7 +9,7 @@ let workInProgress: FiberNode | null;
 // 词意：准备新鲜的堆栈
 // 创建wip hostRootFiber
 function prepareFreshStack(root: FiberRootNode) {
-	// 根据(root.current，即hostRootFiber生成对应的workInProgress
+	// 根据(root.current，即hostRootFiber生成对应的workInProgress（目前只有hostRootFiber）
 	workInProgress = createWorkInProgress(root.current, {});
 }
 
@@ -52,6 +52,15 @@ function renderRoot(root: FiberRootNode) {
 			workInProgress = null;
 		}
 	} while (true);
+
+	// root=fiberRootNode, root.current=hostRootFiber, root.current.alternate=wipHostRootFiber
+	// root.current.alternate就是执行workInProgress = createWorkInProgress(root.current, {})的时候创建的hostRootFiber对于的workInProgress Fiber
+	// 当前这颗hostRootFiber下面已经生成了一颗完整的workInProgress树了，并且这棵树中的某些节点还包含了副作用标记
+	const finishWork = root.current.alternate;
+	root.finishWork = finishWork;
+
+	// wip fiberNode树 树中的flags执行具体的DOM操作
+	commitRoot(root);
 }
 
 function workLoop() {
@@ -78,7 +87,7 @@ function completeUnitOfWork(fiber: FiberNode) {
 
 	do {
 		const next = completeWork(node);
-		const sibling = node.sibling;
+		const sibling = node.sibling; // sibling：包含着子节点和兄弟节点
 		if (sibling !== null) {
 			// 有sibling就结束当前completeUnitOfWork，开始执行sibling的"递"
 			workInProgress = sibling;

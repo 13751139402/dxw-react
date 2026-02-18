@@ -21,14 +21,14 @@ export const beginWork = (wip: FiberNode) => {
 			if (__DEV__) {
 				console.warn('beginWork未实现的类型');
 			}
-			return null;
 	}
+	return null;
 };
 
 function updateHostRoot(wip: FiberNode) {
 	const baseState = wip.memoizedState;
 	const updateQueue = wip.updateQueue as UpdateQueue<Element>;
-	const pending = updateQueue.shared.pending;
+	const pending = updateQueue.shared.pending; // 参与计算的pending
 	updateQueue.shared.pending = null;
 	const { memoizedState } = processUpdateQueue(baseState, pending); // pending是等待的state
 	// reactDom.createRoot(root).render(<App/>)

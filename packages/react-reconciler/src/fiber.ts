@@ -19,6 +19,7 @@ export class FiberNode {
 	memoizedState: any; // 更新完之后的state
 	alternate: FiberNode | null;
 	flags: Flags;
+	subtreeFlags: Flags; // 代表子树中的flags
 	updateQueue: unknown;
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
@@ -47,6 +48,7 @@ export class FiberNode {
 		this.alternate = null;
 		// 副作用
 		this.flags = NoFlags;
+		this.subtreeFlags = NoFlags;
 	}
 }
 
@@ -82,6 +84,7 @@ export const createWorkInProgress = (
 		wip.pendingProps = pendingProps;
 		// 清除副作用，因为副作用可能是上一次渲染遗留的
 		wip.flags = NoFlags;
+		wip.subtreeFlags = NoFlags;
 	}
 	wip.type = current.type;
 	wip.updateQueue = current.updateQueue;
