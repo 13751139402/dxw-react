@@ -1,6 +1,8 @@
 import { beginWork } from './beginWork';
+import { commitMutationEffects } from './commitWork';
 import { completeWork } from './completeWork';
 import { createWorkInProgress, FiberNode, FiberRootNode } from './fiber';
+import { MutationMask, NoFlags } from './fiberFlags';
 import { HostRoot } from './warkTags';
 
 // 深度优先遍历
@@ -61,6 +63,39 @@ function renderRoot(root: FiberRootNode) {
 
 	// wip fiberNode树 树中的flags执行具体的DOM操作
 	commitRoot(root);
+}
+
+function commitRoot(root: FiberRootNode) {
+	const finishWork = root.finishWork;
+	if (finishWork === null) {
+		return;
+	}
+
+	if (__DEV__) {
+		console.warn('commit阶段开始', finishWork);
+	}
+
+	// 重置
+	// root.finishWork已经不需要了，因为被保存在finishWork这个变量中了
+	root.finishWork = null;
+
+	// 判断是否存在3个子阶段需要执行的操作
+	// 需要判断两项 root.flags和root.subtreeFlags
+	// 问：有没有很简便的方式判断commit阶段需要执行呢？
+	// 答：可以用flags-MutationMask来判断，包括子阶段判断是否需要执行，也可以用flags判断
+	const subtreeHasEffect = (finishWork.subtreeFlags & MutationMask) !== NoFlags;
+	const rootHasEffect = (finishWork.flags & MutationMask) !== NoFlags;
+	if (subtreeHasEffect || rootHasEffect) {
+		// beforeMutation
+		// mutation,Flags在此阶段执行
+		commitMutationEffects(finishWork);
+		// fiber树的切换
+		root.current = finishWork;
+		// layout
+	} else {
+		// 即使没有更新发生的话也需要执行这个操作
+		root.current = finishWork;
+	}
 }
 
 function workLoop() {
