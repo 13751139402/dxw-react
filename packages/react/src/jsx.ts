@@ -18,30 +18,35 @@ const ReactElement = function (type: Type, key: Key, ref: Ref, props: Props) {
 		key,
 		ref,
 		props,
-		__mark: 'KaSong'
+		__mark: 'daixunwei'
 	};
 	return element;
 };
 
 // v18的jsx函数就是v17的createReactElement
 export const jsx = (type: ElementType, config: any, ...maybeChildren: any) => {
-	let reactKey: Key = null;
+	let key: Key = null;
 	const props: Props = {};
 	let ref: Ref = null;
-
-	Object.entries(config).forEach(([key, val]) => {
-		switch (key) {
-			case 'key':
-				reactKey = '' + val;
-				break;
-			case 'ref':
-				ref = val;
-				break;
-			default:
-				props[key] = val;
-				break;
+	for (const prop in config) {
+		const val = config[prop];
+		if (prop === 'key') {
+			if (val !== undefined) {
+				key = '' + val;
+			}
+			continue;
 		}
-	});
+		if (prop === 'ref') {
+			if (val !== undefined) {
+				ref = val;
+			}
+			continue;
+		}
+		if ({}.hasOwnProperty.call(config, prop)) {
+			// 如果是自己的prop就赋值给props，如果是原型的prop就忽略
+			props[prop] = val;
+		}
+	}
 
 	const maybeChildrenLength = maybeChildren.length;
 	if (maybeChildrenLength === 1) {
@@ -50,8 +55,32 @@ export const jsx = (type: ElementType, config: any, ...maybeChildren: any) => {
 		props.children = maybeChildren;
 	}
 
-	return ReactElement(type, reactKey, ref, props);
+	return ReactElement(type, key, ref, props);
 };
 
-// React开发环境和生产环境的jsx是不一样的，开发环境会做更多的检查
-export const jsxDEV = jsx;
+// babel转义jsx时开发环境和生成环境的maybeChildren传参不一样
+export const jsxDEV = (type: ElementType, config: any) => {
+	let key: Key = null;
+	const props: Props = {};
+	let ref: Ref = null;
+	for (const prop in config) {
+		const val = config[prop];
+		if (prop === 'key') {
+			if (val !== undefined) {
+				key = '' + val;
+			}
+			continue;
+		}
+		if (prop === 'ref') {
+			if (val !== undefined) {
+				ref = val;
+			}
+			continue;
+		}
+		if ({}.hasOwnProperty.call(config, prop)) {
+			// 如果是自己的prop就赋值给props，如果是原型的prop就忽略
+			props[prop] = val;
+		}
+	}
+	return ReactElement(type, key, ref, props);
+};

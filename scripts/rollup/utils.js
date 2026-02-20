@@ -23,8 +23,11 @@ export function getPackageJSON(pkgName) {
 }
 
 export function getBaseRollupPlugins({
-	alias = { __DEV__: true,preventAssignment:true },
-	typescript = {},
+	alias = { __DEV__: true, preventAssignment: true },
+	typescript = {}
 } = {}) {
+	// replace插件，替换代码中的变量
+	// cjs插件，转换commonjs模块为es模块
+	// ts插件，编译ts文件
 	return [replace(alias), cjs(), ts(typescript)];
 }

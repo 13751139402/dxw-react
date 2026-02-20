@@ -1,10 +1,10 @@
-import React from 'react-dom/client'
-import ReactDOM from 'react-dom/client'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 
+const jsx = <div>23423</div>;
 
-function App(){
-  return "<div>hello world</div>"
-}
-ReactDOM.createRoot(document.getElementById('root')!).render(
-    <App />
-)
+console.log(React);
+console.log(ReactDOM);
+console.log('jsx:', jsx);
+
+// ReactDOM.createRoot(document.getElementById('root')!).render(jsx);
