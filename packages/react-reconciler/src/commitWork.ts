@@ -102,7 +102,7 @@ function appendPlacementNodeIntoContainer(
 	// 传进来的finishedWork不一定是HostComponent类型的fiber节点
 	// 通过finishedWork向下遍历找到对应的宿主环境，也就是HostComponent类型的fiber
 	if (finishedWork.tag === HostComponent || finishedWork.tag === HostText) {
-		appendChildToContainer(finishedWork.stateNode, hostParent);
+		appendChildToContainer(hostParent, finishedWork.stateNode);
 		return;
 	}
 	// 递归向下DFS，直到找到第一层HostComponent或者HostText类型的fiber节点，将这个子节点及兄弟节点，都执行appendChildToContainer操作

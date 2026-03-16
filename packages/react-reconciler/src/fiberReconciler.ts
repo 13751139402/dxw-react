@@ -10,7 +10,7 @@ import {
 import { ReactElementType } from 'shared/ReactTypes';
 import { scheduleUpdateOnFiber } from './workLoop';
 
-// 创建整个应用的根节点FiberRootNode,并将FiberRootNode和hostRootFiber连接起来
+// 先创建当前宿主HostRootNode，再创建FiberRootNode，并把FiberRootNode.current指向HostRootNode
 // reactDom.createRoot(root).render(<App/>)的createRoot函数
 export function createContainer(container: Container) {
 	const hostRootFiber = new FiberNode(HostRoot, {}, null);
@@ -28,7 +28,7 @@ export function updateContainer(
 ) {
 	const hostRootFiber = root.current;
 	const update = createUpdate<ReactElementType | null>(element);
-	// 将update插入updateQueue中以后
+	// 将update插入updateQueue中以后,用于beginWork中的reconcilerChildren时计算
 	enqueueUpdate(
 		hostRootFiber.updateQueue as UpdateQueue<ReactElementType | null>,
 		update

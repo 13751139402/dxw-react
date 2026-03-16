@@ -53,7 +53,7 @@ function renderRoot(root: FiberRootNode) {
 			}
 			workInProgress = null;
 		}
-	} while (true);
+	} while (workInProgress);
 
 	// root=fiberRootNode, root.current=hostRootFiber, root.current.alternate=wipHostRootFiber
 	// root.current.alternate就是执行workInProgress = createWorkInProgress(root.current, {})的时候创建的hostRootFiber对于的workInProgress Fiber
