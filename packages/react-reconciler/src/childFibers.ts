@@ -4,6 +4,7 @@ import { REACT_ELEMENT_TYPE } from 'shared/ReactSymbols';
 import { HostText } from './warkTags';
 import { Placement } from './fiberFlags';
 
+// ChildReconciler 是 React Diff 算法的核心实现，负责将 React 元素转换为 Fiber 节点，是连接 JSX 与 Fiber 树的桥梁
 function ChildReconciler(shouldTrackEffects: boolean) {
 	const reconcilerSingleElement = (
 		returnFiber: FiberNode, // 父级fiber
@@ -34,12 +35,18 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 		return fiber;
 	}
 
+	// 1. 输入：父 Fiber、旧子 Fiber、新子节点
+	// 2. 处理：
+	// - 识别新子节点类型
+	// - 创建或更新对应的 Fiber 节点
+	// - 添加必要的副作用标记
+	// 3. 输出：新的子 Fiber 节点
 	return function reconcilerChildFibers(
 		returnFiber: FiberNode,
-		currentFiber: FiberNode | null,
+		currentFiber: FiberNode | null, // 旧子Fiber和新子节点对比生成新的子FiberNode
 		newChild?: ReactElementType
 	) {
-		// 判断当前fiber的类型
+		// 根据子节点类型（ReactElement、文本等）选择不同的处理逻辑
 		if (typeof newChild === 'object' && newChild !== null) {
 			switch (newChild.$$typeof) {
 				case REACT_ELEMENT_TYPE:
@@ -71,6 +78,7 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 // reconcilerChildFibers需要添加flags
 export const reconcilerChildFibers = ChildReconciler(true);
 // 增加优化策略：mountChildFibers不需要添加placement flags
+// 初次渲染时createRoot，current Tree是有一个hostRootFiber的，wip tree会生成hostRootFiber
 // 依靠本就有的hostRootFiber这个placement flags单次插入就够了
 // 将已经离屏构建好的整颗dom树插入到页面中
 export const mountChildFibers = ChildReconciler(false);

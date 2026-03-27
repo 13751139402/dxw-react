@@ -64,7 +64,12 @@ function renderRoot(root: FiberRootNode) {
 	// wip fiberNode树 树中的flags执行具体的DOM操作
 	commitRoot(root);
 }
-
+// commitRoot 函数是 React 协调器中 commit 阶段（提交阶段）的入口函数，负责将协调阶段的结果提交到实际的 DOM 中。
+// ## 核心功能
+// 1. 提交阶段开始 ：启动 React 的 commit 阶段
+// 2. 副作用判断 ：判断是否需要执行 DOM 操作
+// 3. 执行副作用 ：执行 DOM 更新、插入、删除等操作
+// 4. Fiber 树切换 ：完成新旧 Fiber 树的切换
 function commitRoot(root: FiberRootNode) {
 	const finishWork = root.finishWork;
 	if (finishWork === null) {
@@ -83,6 +88,22 @@ function commitRoot(root: FiberRootNode) {
 	// 需要判断两项 root.flags和root.subtreeFlags
 	// 问：有没有很简便的方式判断commit阶段需要执行呢？
 	// 答：可以用flags-MutationMask来判断，包括子阶段判断是否需要执行，也可以用flags判断
+
+	// 	### 性能优势
+	// 1. 速度快 ：位运算比属性访问快得多
+	// 2. 内存少 ：一个数字可以表示多个状态
+	// 3. 组合灵活 ：可以用掩码一次性检查多个状态
+	// 4. 代码简洁 ：一行代码就能完成复杂的状态检查
+
+	// 使用 MutationMask 掩码检查是否有需要在 commit 阶段执行的副作用：
+	// - 检查子树是否有副作用
+	// - 检查根节点是否有副作用
+
+	// 	### 按位与操作符（&）按位与会对两个数的二进制位进行操作：
+	// - 只有当两个位都是 1 时，结果才是 1
+	// - 只要有一个位是 0，结果就是 0
+	// 比如：1&0=0，0&0=0，1&1=1
+	// 比如：finishWork.subtreeFlags=0b0000010，MutationMask=0b0000111，那么完的结果就是0b0000010
 	const subtreeHasEffect = (finishWork.subtreeFlags & MutationMask) !== NoFlags;
 	const rootHasEffect = (finishWork.flags & MutationMask) !== NoFlags;
 	if (subtreeHasEffect || rootHasEffect) {
@@ -106,7 +127,9 @@ function workLoop() {
 // 词意：执行工作单元
 function performUnitOfWork(fiber: FiberNode) {
 	const next = beginWork(fiber);
-	// 等待的props变为当前props
+	// ReactElement.props.child保存着子节点的ReactElement
+	// beginWork会把ReactElement.props.child中的子节点的ReactElement转换为FiberNode，保存到fiber.child中
+	// pendingProps转化完毕后，memoizedProps就会被更新为pendingProps
 	fiber.memoizedProps = fiber.pendingProps;
 	if (next === null) {
 		// 到底开始“归”阶段
@@ -116,20 +139,23 @@ function performUnitOfWork(fiber: FiberNode) {
 		workInProgress = next;
 	}
 }
-
+// beginWork 负责"下" ：处理当前节点的子节点，向下遍历 Fiber 树
+// completeWork 负责"右和上" ：处理当前节点的兄弟节点（右）和父节点（上）
 function completeUnitOfWork(fiber: FiberNode) {
 	let node: FiberNode | null = fiber;
 
 	do {
-		const next = completeWork(node);
-		const sibling = node.sibling; // sibling：包含着子节点和兄弟节点
+		// 调用 completeWork 处理当前节点的完成工作
+		completeWork(node);
+		// 检查当前节点是否有兄弟节点（sibling）
+		const sibling = node.sibling;
 		if (sibling !== null) {
-			// 有sibling就结束当前completeUnitOfWork，开始执行sibling的"递"
+			// 如果有兄弟节点，将 workInProgress 指向兄弟节点并返回，开始处理兄弟节点的"递"阶段
 			workInProgress = sibling;
 			return;
 		}
-		// "归"完成就回到父级
+		// 如果没有兄弟节点，返回到父节点继续处理
 		node = node.return;
 		workInProgress = null;
-	} while (node !== null); // 一直"归"到HostRootFiber
+	} while (node !== null); // 循环直到回到根节点（HostRootFiber）
 }
