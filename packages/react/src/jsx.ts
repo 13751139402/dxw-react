@@ -14,6 +14,18 @@ import {
 const ReactElement = function (type: Type, key: Key, ref: Ref, props: Props) {
 	const element: ReactElementType = {
 		$$typeof: REACT_ELEMENT_TYPE,
+		// HostComponent 与 FunctionComponent 的 type 区别：
+		// 1.值的类型不同
+		//	HostComponent（原生 DOM 元素）：type 是 字符串 例如： 'div' 、 'span' 、 'input' 等
+		//    JSX <div>Hello</div>
+		//    编译后
+		//    jsx('div', { children: 'Hello' })
+		//    ReactElement.type = 'div'
+		// 	FunctionComponent（函数组件）：type 是 函数 例如： App 、 Child 等
+		//    JSX <App />
+		//    编译后
+		//    jsx(App, {})
+		//    ReactElement.type = App
 		type,
 		key,
 		ref,

@@ -5,7 +5,12 @@ import {
 	createTextInstance
 } from 'react-dom/src/hostConfig';
 import { FiberNode } from './fiber';
-import { HostComponent, HostRoot, HostText } from './warkTags';
+import {
+	FunctionComponent,
+	HostComponent,
+	HostRoot,
+	HostText
+} from './warkTags';
 import { NoFlags } from './fiberFlags';
 // 在 React 协调过程中的位置
 // completeWork 函数是"归"阶段的核心，与"递"阶段的 beginWork 函数配合：
@@ -68,6 +73,11 @@ export const completeWork = (wip: FiberNode) => {
 		// HostRoot （根节点）：处理根节点的完成逻辑
 		case HostRoot:
 			// 走完整个流程会生成<div>hello</div>的离屏dom，但是依然没有挂载到根dom中，需要等到commit阶段再插入到dom树
+			bubbleProperties(wip);
+			return null;
+		// DFS中，子节点会先进行completeWork，所以子节点如果是HostComponent或者HostText，会先完成创建且带上subtreeFlags,
+		// 等到FC completeWork时，子节点都已经执行完毕了，FC只需要向上冒泡subtreeFlags即可
+		case FunctionComponent:
 			bubbleProperties(wip);
 			return null;
 

@@ -1,12 +1,21 @@
 import { ReactElementType } from 'shared/ReactTypes';
 import { FiberNode } from './fiber';
 import { processUpdateQueue, UpdateQueue } from './updateQueue';
-import { HostComponent, HostRoot, HostText } from './warkTags';
+import {
+	HostComponent,
+	HostRoot,
+	HostText,
+	FunctionComponent
+} from './warkTags';
 import { mountChildFibers, reconcilerChildFibers } from './childFibers';
+import { renderWithHooks } from './fiberHooks';
 
 // 递归中的递阶段
 // 创建wip fibers
-// beginWork 在"递"阶段的核心职责是 生成下一个子 Fiber 节点
+// beginWork 在"递"阶段的核心职责是
+//  1.添加flags
+//  2.生成下一个子 Fiber 节点
+
 // 1.根据 Fiber 节点类型进行差异化处理
 // 	 a.根据 wip.tag 判断节点类型（HostRoot、HostComponent、HostText 等）对不同类型的节点执    行不同的处理逻辑
 // 2.处理更新和创建子 Fiber 节点
@@ -30,6 +39,8 @@ export const beginWork = (wip: FiberNode) => {
 		case HostText:
 			// 文本节点没有children，结束递阶段，开始归阶段
 			return null;
+		case FunctionComponent:
+			return updateFunctionComponent(wip);
 
 		default:
 			if (__DEV__) {
@@ -39,6 +50,19 @@ export const beginWork = (wip: FiberNode) => {
 	return null;
 };
 
+function updateFunctionComponent(wip: FiberNode) {
+	// FC的nextChildren从哪来呢？
+	// function App() {
+	// 		return <img />;
+	// }
+	// 对于App的children就是img组件，如何才能得到img组件？调用App()组件就能得到
+	// 所以nextChildren就是FC的执行结果
+	// 和HostComponent相比，唯一的差别就是children需要调用renderWithHooks函数，得到FC的执行结果
+	const nextChildren = renderWithHooks(wip);
+	// 调用 reconcilerChildren 将 子ReactElment 生成或更新成 子Fiber
+	reconcilerChildren(wip, nextChildren);
+	return wip.child;
+}
 function updateHostRoot(wip: FiberNode) {
 	const baseState = wip.memoizedState;
 	const updateQueue = wip.updateQueue as UpdateQueue<Element>;

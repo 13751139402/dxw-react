@@ -1,6 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-const jsx = <div>hello</div>;
+function App() {
+	return (
+		<div>
+			<Child></Child>
+		</div>
+	);
+}
+function Child() {
+	return <div>big-react</div>;
+}
 
-ReactDOM.createRoot(document.getElementById('root')!).render(jsx);
+ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
