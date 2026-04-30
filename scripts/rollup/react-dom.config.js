@@ -2,7 +2,7 @@ import { getPackageJSON, resolvePkgPath, getBaseRollupPlugins } from './utils';
 import generatePackageJson from 'rollup-plugin-generate-package-json';
 import alias from '@rollup/plugin-alias';
 
-const { name, module } = getPackageJSON('react-dom');
+const { name, module, peerDependencies } = getPackageJSON('react-dom');
 
 // react-dom包的路径
 const pkgPath = resolvePkgPath(name);
@@ -25,6 +25,9 @@ export default [
 				format: 'umd'
 			}
 		],
+		// 对于react-dom来说，react是外部的包，外部的包的代码就不会打包进react-dom的产物里
+		// 这样react-dom和react就能共用一个数据共享层
+		external: [...Object.keys(peerDependencies)],
 		plugins: [
 			...getBaseRollupPlugins(),
 			// webpack resolve alias
@@ -49,7 +52,7 @@ export default [
 				})
 			})
 		]
-	},
+	}
 	// react-test-utils
 	// {
 	// 	input: `${pkgPath}/test-utils.ts`,
